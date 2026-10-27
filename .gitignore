@@ -1,0 +1,8 @@
+# runtime data - never commit personal trade history
+ctrader-trades.json
+
+# vercel
+.vercel
+
+# node
+node_modules
