@@ -130,7 +130,7 @@ namespace cAlgo.Robots
             }
             catch (Exception ex)
             {
-                Print("Bridge unreachable ({0}). Is ctrader_bridge.py running?", ex.Message);
+                Print("Bridge unreachable ({0}). Run start-bridge.bat (node ctrader_bridge.js)", ex.Message);
             }
         }
 

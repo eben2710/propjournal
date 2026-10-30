@@ -1,0 +1,26 @@
+{
+  "name": "propjournal",
+  "version": "1.0.0",
+  "description": "Prop Firm Risk Ledger - Automated cTrader Trading Journal",
+  "main": "ctrader_bridge.js",
+  "scripts": {
+    "start": "node ctrader_bridge.js",
+    "dev": "node ctrader_bridge.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "trading",
+    "journal",
+    "ctrader",
+    "prop-firm",
+    "risk-management",
+    "automated-trading"
+  ],
+  "author": "Ebenezer",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

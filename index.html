@@ -147,6 +147,52 @@ header{display:flex;align-items:center;justify-content:space-between;gap:14px;fl
 .dbar i.down{background:linear-gradient(180deg,var(--red2),rgba(244,63,94,.3))}
 .dbar span{font-size:9px;color:var(--dim);font-family:var(--mono)}
 
+/* ---------- weekly calendar ---------- */
+.weekly-cal{overflow-x:auto}
+.wcal-table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:720px}
+.wcal-table th,.wcal-table td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+.wcal-table th{background:rgba(34,211,238,.08);color:var(--mut);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.wcal-table .wk-label{background:rgba(255,255,255,.04);color:var(--txt);font-weight:600;text-align:left;min-width:90px}
+.wcal-table .day{position:relative;min-width:70px;height:56px;vertical-align:top}
+.wcal-table .day.empty{background:rgba(255,255,255,.02)}
+.wcal-table .day .date{font-size:9px;color:var(--dim);margin-bottom:2px}
+.wcal-table .day .pnl{font-weight:700;font-size:12px;line-height:1.2}
+.wcal-table .day .pnl.up{color:var(--green2)}
+.wcal-table .day .pnl.down{color:var(--red2)}
+.wcal-table .day .pnl.zero{color:var(--dim)}
+.wcal-table .day .trades{font-size:9px;color:var(--dim);margin-top:2px}
+.wcal-table .week-total{background:rgba(34,211,238,.1);color:var(--cyan2);font-weight:700}
+.wcal-table .week-total.neg{color:var(--red2);background:rgba(244,63,94,.1)}
+.wcal-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--mut)}
+.wcal-legend span{display:flex;align-items:center;gap:6px}
+.wcal-legend i{width:14px;height:14px;border-radius:3px}
+.wcal-legend .up{background:linear-gradient(135deg,var(--green),var(--green2))}
+.wcal-legend .down{background:linear-gradient(135deg,#be123c,var(--red))}
+.wcal-legend .zero{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+
+/* ---------- monthly calendar ---------- */
+.monthly-cal{overflow-x:auto}
+.mcal-table{width:100%;border-collapse:collapse;font-size:10.5px;font-family:var(--mono);min-width:900px}
+.mcal-table th,.mcal-table td{border:1px solid var(--line);padding:5px 6px;text-align:center;vertical-align:top}
+.mcal-table th{background:rgba(34,211,238,.08);color:var(--mut);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.mcal-table .mth-label{background:rgba(255,255,255,.04);color:var(--txt);font-weight:600;text-align:left;min-width:100px;white-space:nowrap}
+.mcal-table .day{position:relative;min-width:48px;height:48px}
+.mcal-table .day.empty{background:rgba(255,255,255,.02)}
+.mcal-table .day .date{font-size:8.5px;color:var(--dim);margin-bottom:1px}
+.mcal-table .day .pnl{font-weight:700;font-size:11px;line-height:1.15}
+.mcal-table .day .pnl.up{color:var(--green2)}
+.mcal-table .day .pnl.down{color:var(--red2)}
+.mcal-table .day .pnl.zero{color:var(--dim)}
+.mcal-table .day .trades{font-size:8px;color:var(--dim);margin-top:1px}
+.mcal-table .month-total{background:rgba(34,211,238,.1);color:var(--cyan2);font-weight:700;font-size:10.5px}
+.mcal-table .month-total.neg{color:var(--red2);background:rgba(244,63,94,.1)}
+.mcal-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--mut)}
+.mcal-legend span{display:flex;align-items:center;gap:6px}
+.mcal-legend i{width:14px;height:14px;border-radius:3px}
+.mcal-legend .up{background:linear-gradient(135deg,var(--green),var(--green2))}
+.mcal-legend .down{background:linear-gradient(135deg,#be123c,var(--red))}
+.mcal-legend .zero{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+
 /* ---------- layout main ---------- */
 .main{display:grid;grid-template-columns:400px 1fr;gap:14px;align-items:start}
 
@@ -354,6 +400,14 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
       <h3><span class="dot"></span>Daily P&L · last 14 days</h3>
       <div class="dbars" id="dailyBars"></div>
     </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3><span class="dot"></span>Weekly P&L Calendar</h3>
+      <div class="weekly-cal" id="weeklyCal"></div>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3><span class="dot"></span>Monthly P&L Calendar</h3>
+      <div class="monthly-cal" id="monthlyCal"></div>
+    </div>
   </div>
 
   <!-- MAIN: FORM + TABLE -->
@@ -430,6 +484,12 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
       </div>
     </div>
     <div class="field"><label>cTrader bridge URL</label><input type="text" id="s_bridge" placeholder="http://127.0.0.1:8787"></div>
+    <div class="field"><label>Use Vercel API (auto on deployed)</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="s_useVercel" style="width:auto">
+        <span>Fetch trades via Vercel serverless function (requires BRIDGE_URL in Vercel env)</span>
+      </label>
+    </div>
     <div class="field"><label>Point value per 1.0 price move, per 1.0 lot (JSON)</label>
       <textarea id="s_symbols" rows="8" class="mono" style="font-size:11.5px"></textarea>
     </div>
@@ -463,6 +523,8 @@ function freshState(){
   return {
     initialBalance: 10000, phase: "challenge", floating: 0,
     bridgeUrl: "http://127.0.0.1:8787",
+    // Auto-detect Vercel deployment
+    useVercelApi: typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1",
     symbolValues: JSON.parse(JSON.stringify(DEFAULT_SYMBOLS)),
     trades: []
   };
@@ -625,6 +687,8 @@ function render(){
 
   renderTable(m);
   renderDailyBars(m);
+  renderWeeklyCal(m);
+  renderMonthlyCal(m);
   renderChart(m);
 }
 
@@ -680,6 +744,179 @@ function renderDailyBars(m){
         return "<div class='dbar' title='"+d+": "+usd(v)+"'><i class='"+(v>=0?"up":"down")+"' style='height:"+h+"px'></i><span>"+d.slice(5)+"</span></div>";
       }).join("")
     : "<div class='empty' style='width:100%'>Daily P&L appears here once you log trades.</div>";
+}
+
+function renderWeeklyCal(m){
+  const byDay = {};
+  m.trades.forEach(t=>{
+    const d = t.date;
+    if (!byDay[d]) byDay[d] = { pnl: 0, count: 0 };
+    byDay[d].pnl += (num(t.pnl)||0);
+    byDay[d].count += 1;
+  });
+  if (!Object.keys(byDay).length){
+    $("weeklyCal").innerHTML = "<div class='empty' style='padding:24px'>Weekly calendar appears once you log trades.</div>";
+    return;
+  }
+  const allDates = Object.keys(byDay).sort();
+  const first = new Date(allDates[0]);
+  const last = new Date(allDates[allDates.length-1]);
+  const startMon = new Date(first);
+  startMon.setDate(first.getDate() - ((first.getDay()+6)%7));
+  const endFri = new Date(last);
+  endFri.setDate(last.getDate() + (5 - ((last.getDay()+6)%7)));
+
+  const weeks = [];
+  let cur = new Date(startMon);
+  while (cur <= endFri){
+    const week = { label: "", days: [], total: 0 };
+    const mon = new Date(cur);
+    const fri = new Date(cur); fri.setDate(cur.getDate()+4);
+    week.label = mon.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + " – " + fri.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'2-digit'});
+    for (let i=0;i<5;i++){
+      const d = new Date(cur); d.setDate(cur.getDate()+i);
+      const key = d.toISOString().slice(0,10);
+      const data = byDay[key];
+      if (data){
+        week.days.push({ date: key, pnl: data.pnl, count: data.count });
+        week.total += data.pnl;
+      }else{
+        week.days.push(null);
+      }
+    }
+    weeks.push(week);
+    cur.setDate(cur.getDate()+7);
+  }
+
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri"];
+  let html = "<table class='wcal-table'><thead><tr><th class='wk-label'>Week</th>";
+  dayNames.forEach(n=> html += "<th>"+n+"</th>");
+  html += "<th>Week Total</th></tr></thead><tbody>";
+
+  weeks.forEach(w=>{
+    html += "<tr><td class='wk-label'>"+esc(w.label)+"</td>";
+    w.days.forEach(day=>{
+      if (!day){
+        html += "<td class='day empty'></td>";
+      }else{
+        const p = day.pnl;
+        const cls = p>0?"up":(p<0?"down":"zero");
+        const sign = p>0?"+":"";
+        html += "<td class='day'><div class='date'>"+day.date.slice(5)+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+day.count+" trade"+(day.count!==1?"s":"")+"</div></td>";
+      }
+    });
+    const totCls = w.total>=0?"":" neg";
+    const totSign = w.total>0?"+":"";
+    html += "<td class='week-total"+totCls+"'>"+totSign+usd(w.total)+"</td></tr>";
+  });
+  html += "</tbody></table>";
+  html += "<div class='wcal-legend'><span><i class='up'></i>Profitable day</span><span><i class='down'></i>Losing day</span><span><i class='zero'></i>No trades</span></div>";
+  $("weeklyCal").innerHTML = html;
+}
+
+function renderMonthlyCal(m){
+  const byDay = {};
+  m.trades.forEach(t=>{
+    const d = t.date;
+    if (!byDay[d]) byDay[d] = { pnl: 0, count: 0 };
+    byDay[d].pnl += (num(t.pnl)||0);
+    byDay[d].count += 1;
+  });
+  if (!Object.keys(byDay).length){
+    $("monthlyCal").innerHTML = "<div class='empty' style='padding:24px'>Monthly calendar appears once you log trades.</div>";
+    return;
+  }
+  const allDates = Object.keys(byDay).sort();
+  const first = new Date(allDates[0]);
+  const last = new Date(allDates[allDates.length-1]);
+
+  // Group by month
+  const months = [];
+  let cur = new Date(first.getFullYear(), first.getMonth(), 1);
+  const endMonth = new Date(last.getFullYear(), last.getMonth(), 1);
+  while (cur <= endMonth){
+    const monthKey = cur.getFullYear() + "-" + String(cur.getMonth()+1).padStart(2,"0");
+    const monthLabel = cur.toLocaleDateString(undefined, {month:'short', year:'2-digit'});
+    months.push({ key: monthKey, label: monthLabel, days: {}, total: 0 });
+    cur.setMonth(cur.getMonth()+1);
+  }
+
+  // Assign trades to months
+  Object.entries(byDay).forEach(([date, data])=>{
+    const monthKey = date.slice(0,7);
+    const month = months.find(m=> m.key === monthKey);
+    if (month){
+      month.days[date] = data;
+      month.total += data.pnl;
+    }
+  });
+
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  let html = "<table class='mcal-table'><thead><tr><th class='mth-label'>Month</th>";
+  dayNames.forEach(n=> html += "<th>"+n+"</th>");
+  html += "<th>Month Total</th></tr></thead><tbody>";
+
+  months.forEach(mth=>{
+    // Build calendar grid for this month
+    const year = parseInt(mth.key.split("-")[0]);
+    const month = parseInt(mth.key.split("-")[1]);
+    const firstDay = new Date(year, month-1, 1);
+    const lastDay = new Date(year, month, 0);
+    const startOffset = (firstDay.getDay() + 6) % 7; // Monday = 0
+    const daysInMonth = lastDay.getDate();
+
+    html += "<tr><td class='mth-label'>"+esc(mth.label)+"</td>";
+
+    let day = 1 - startOffset;
+    let weekCells = [];
+    while (day <= daysInMonth){
+      for (let dow=0; dow<7; dow++){
+        if (day >= 1 && day <= daysInMonth){
+          const key = year + "-" + String(month).padStart(2,"0") + "-" + String(day).padStart(2,"0");
+          const data = mth.days[key];
+          if (data){
+            const p = data.pnl;
+            const cls = p>0?"up":(p<0?"down":"zero");
+            const sign = p>0?"+":"";
+            weekCells.push("<td class='day'><div class='date'>"+day+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+data.count+"</div></td>");
+          }else{
+            weekCells.push("<td class='day empty'><div class='date'>"+day+"</div></td>");
+          }
+        }else{
+          weekCells.push("<td class='day empty'></td>");
+        }
+        day++;
+      }
+      // If we still have days left, close row and start new one (but for monthly we show all weeks in one row)
+      if (day <= daysInMonth){
+        // This month spans multiple weeks - we'll show as one long row
+        // Actually, let's just show all days in one row for monthly view
+      }
+    }
+    // For monthly, we show all days in a single row (wrap visually via horizontal scroll)
+    // Rebuild: just iterate all days of month
+    html = html.slice(0, -5); // remove </tr> we'll rebuild
+    html += "<td class='mth-label'>"+esc(mth.label)+"</td>";
+    for (let d=1; d<=daysInMonth; d++){
+      const key = year + "-" + String(month).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+      const data = mth.days[key];
+      if (data){
+        const p = data.pnl;
+        const cls = p>0?"up":(p<0?"down":"zero");
+        const sign = p>0?"+":"";
+        html += "<td class='day'><div class='date'>"+d+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+data.count+"</div></td>";
+      }else{
+        html += "<td class='day empty'><div class='date'>"+d+"</div></td>";
+      }
+    }
+    const totCls = mth.total>=0?"":" neg";
+    const totSign = mth.total>0?"+":"";
+    html += "<td class='month-total"+totCls+"'>"+totSign+usd(mth.total)+"</td></tr>";
+  });
+
+  html += "</tbody></table>";
+  html += "<div class='mcal-legend'><span><i class='up'></i>Profitable day</span><span><i class='down'></i>Losing day</span><span><i class='zero'></i>No trades</span></div>";
+  $("monthlyCal").innerHTML = html;
 }
 
 function renderChart(m){
@@ -827,6 +1064,7 @@ function openSettings(){
   $("s_initial").value = state.initialBalance;
   $("s_phase").value = state.phase;
   $("s_bridge").value = state.bridgeUrl || "http://127.0.0.1:8787";
+  $("s_useVercel").checked = state.useVercelApi || false;
   $("s_symbols").value = JSON.stringify(state.symbolValues, null, 2);
   $("settingsOverlay").classList.add("show");
 }
@@ -842,6 +1080,7 @@ $("saveSettings").onclick = ()=>{
   state.initialBalance = b;
   state.phase = $("s_phase").value;
   state.bridgeUrl = ($("s_bridge").value.trim() || "http://127.0.0.1:8787").replace(/\/+$/, "");
+  state.useVercelApi = $("s_useVercel").checked;
   state.symbolValues = syms;
   save(); render();
   $("settingsOverlay").classList.remove("show");
@@ -893,11 +1132,17 @@ function refreshSymList(){
   $("symList").innerHTML = Object.keys(state.symbolValues).map(s=>"<option value='"+esc(s)+"'>").join("");
 }
 async function syncCtrader(verbose){
-  const base = String(state.bridgeUrl||"http://127.0.0.1:8787").replace(/\/+$/,"");
+  // Determine API endpoint: local bridge or Vercel serverless function
+  const isVercel = state.useVercelApi === true;
+  const base = isVercel ? window.location.origin : String(state.bridgeUrl||"http://127.0.0.1:8787").replace(/\/+$/,"");
+  const apiUrl = isVercel ? base + "/api/trades" : base + "/api/trades";
+
   try{
-    const r = await fetch(base+"/api/trades",{cache:"no-store"});
+    const r = await fetch(apiUrl,{cache:"no-store"});
     if(!r.ok) throw new Error("HTTP "+r.status);
     const remote = await r.json();
+    // Vercel API returns { trades: [...], count: N, fetchedAt: ..., source: ... }
+    const trades = Array.isArray(remote.trades) ? remote.trades : (Array.isArray(remote) ? remote : []);
     const have = new Set(state.trades.filter(t=>t.ext).map(t=>t.ext));
     let added = 0;
     for(const t of remote){
@@ -913,9 +1158,14 @@ async function syncCtrader(verbose){
       added++;
     }
     if(added){ refreshSymList(); save(); render(); toast("cTrader sync: imported "+added+" trade(s)","ok"); }
-    else if (verbose) toast("cTrader sync: up to date ("+remote.length+" trade(s) on bridge)");
+    else if (verbose) toast("cTrader sync: up to date ("+trades.length+" trade(s) on bridge)");
   }catch(e){
-    if (verbose) toast("Cannot reach bridge at "+base+" — run:  node ctrader_bridge.js","err");
+    if (verbose) {
+      const msg = isVercel
+        ? "Cannot reach Vercel API — check BRIDGE_URL in Vercel env vars and ensure tunnel is running"
+        : "Cannot reach bridge at "+base+" — run:  node ctrader_bridge.js";
+      toast(msg,"err");
+    }
   }
 }
 $("syncCtraderBtn").onclick = ()=> syncCtrader(true);

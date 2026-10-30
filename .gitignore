@@ -6,3 +6,33 @@ ctrader-trades.json
 
 # node
 node_modules
+
+# environment files
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# test coverage
+coverage/
+
+# build outputs
+dist/
+build/
+*.tsbuildinfo
