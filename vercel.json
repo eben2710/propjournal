@@ -5,5 +5,9 @@
   "buildCommand": "",
   "devCommand": "node ctrader_bridge.js",
   "installCommand": "",
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "functions": {
+    "api/health.js": { "runtime": "edge" },
+    "api/trades.js": { "runtime": "edge" }
+  }
 }
