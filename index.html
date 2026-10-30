@@ -147,54 +147,36 @@ header{display:flex;align-items:center;justify-content:space-between;gap:14px;fl
 .dbar i.down{background:linear-gradient(180deg,var(--red2),rgba(244,63,94,.3))}
 .dbar span{font-size:9px;color:var(--dim);font-family:var(--mono)}
 
-/* ---------- weekly calendar ---------- */
-.weekly-cal{overflow-x:auto}
-.wcal-table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:720px}
-.wcal-table th,.wcal-table td{border:1px solid var(--line);padding:6px 8px;text-align:center}
-.wcal-table th{background:rgba(34,211,238,.08);color:var(--mut);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
-.wcal-table .wk-label{background:rgba(255,255,255,.04);color:var(--txt);font-weight:600;text-align:left;min-width:90px}
-.wcal-table .day{position:relative;min-width:70px;height:56px;vertical-align:top}
-.wcal-table .day.empty{background:rgba(255,255,255,.02)}
-.wcal-table .day .date{font-size:9px;color:var(--dim);margin-bottom:2px}
-.wcal-table .day .pnl{font-weight:700;font-size:12px;line-height:1.2}
-.wcal-table .day .pnl.up{color:var(--green2)}
-.wcal-table .day .pnl.down{color:var(--red2)}
-.wcal-table .day .pnl.zero{color:var(--dim)}
-.wcal-table .day .trades{font-size:9px;color:var(--dim);margin-top:2px}
-.wcal-table .week-total{background:rgba(34,211,238,.1);color:var(--cyan2);font-weight:700}
-.wcal-table .week-total.neg{color:var(--red2);background:rgba(244,63,94,.1)}
-.wcal-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--mut)}
-.wcal-legend span{display:flex;align-items:center;gap:6px}
-.wcal-legend i{width:14px;height:14px;border-radius:3px}
-.wcal-legend .up{background:linear-gradient(135deg,var(--green),var(--green2))}
-.wcal-legend .down{background:linear-gradient(135deg,#be123c,var(--red))}
-.wcal-legend .zero{background:rgba(255,255,255,.08);border:1px solid var(--line)}
-
-/* ---------- monthly calendar ---------- */
-.monthly-cal{overflow-x:auto}
-.mcal-table{width:100%;border-collapse:collapse;font-size:10.5px;font-family:var(--mono);min-width:900px}
-.mcal-table th,.mcal-table td{border:1px solid var(--line);padding:5px 6px;text-align:center;vertical-align:top}
-.mcal-table th{background:rgba(34,211,238,.08);color:var(--mut);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
-.mcal-table .mth-label{background:rgba(255,255,255,.04);color:var(--txt);font-weight:600;text-align:left;min-width:100px;white-space:nowrap}
-.mcal-table .day{position:relative;min-width:48px;height:48px}
-.mcal-table .day.empty{background:rgba(255,255,255,.02)}
-.mcal-table .day .date{font-size:8.5px;color:var(--dim);margin-bottom:1px}
-.mcal-table .day .pnl{font-weight:700;font-size:11px;line-height:1.15}
-.mcal-table .day .pnl.up{color:var(--green2)}
-.mcal-table .day .pnl.down{color:var(--red2)}
-.mcal-table .day .pnl.zero{color:var(--dim)}
-.mcal-table .day .trades{font-size:8px;color:var(--dim);margin-top:1px}
-.mcal-table .month-total{background:rgba(34,211,238,.1);color:var(--cyan2);font-weight:700;font-size:10.5px}
-.mcal-table .month-total.neg{color:var(--red2);background:rgba(244,63,94,.1)}
-.mcal-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--mut)}
-.mcal-legend span{display:flex;align-items:center;gap:6px}
-.mcal-legend i{width:14px;height:14px;border-radius:3px}
-.mcal-legend .up{background:linear-gradient(135deg,var(--green),var(--green2))}
-.mcal-legend .down{background:linear-gradient(135deg,#be123c,var(--red))}
-.mcal-legend .zero{background:rgba(255,255,255,.08);border:1px solid var(--line)}
-
-/* ---------- layout main ---------- */
-.main{display:grid;grid-template-columns:400px 1fr;gap:14px;align-items:start}
+/* calendar */
+.view-toggle{display:inline-flex;gap:6px;margin-left:auto}
+.toggle-pill{cursor:pointer;font:600 11px 'Inter';padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--mut);transition:.15s}
+.toggle-pill:hover{border-color:var(--line2);color:var(--txt)}
+.toggle-pill.active{background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(37,99,235,.22));border-color:rgba(34,211,238,.55);color:var(--cyan2)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
+.cal-arrow{cursor:pointer;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--txt);font-size:16px;line-height:1;transition:.15s}
+.cal-arrow:hover{border-color:var(--cyan);color:var(--cyan2)}
+.cal-title{text-align:center}
+.cal-title b{font-size:17px;display:block}
+.cal-title span{display:block;font:700 12px var(--mono);margin-top:3px}
+.cal-title span.up{color:var(--green2)}.cal-title span.down{color:var(--red2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr) 62px;gap:8px}
+#calHead{margin-bottom:8px}
+#calHead span{text-align:center;font:700 10px var(--mono);color:var(--dim);letter-spacing:1px;padding-bottom:2px}
+.cal-cell{min-height:58px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02);padding:7px 9px;position:relative;transition:.15s}
+.cal-cell:hover{border-color:var(--line2)}
+.cal-cell.off{opacity:.3}
+.cal-cell.today{border-color:rgba(34,211,238,.6);box-shadow:0 0 0 1px rgba(34,211,238,.25)}
+.cal-cell .d{font:600 10px var(--mono);color:var(--dim)}
+.cal-cell .n{position:absolute;top:7px;right:9px;font:600 9px var(--mono);color:var(--dim)}
+.cal-cell .v{position:absolute;left:9px;right:9px;bottom:7px;font:700 12px var(--mono)}
+.cal-cell .v.up{color:var(--green2)}.cal-cell .v.down{color:var(--red2)}
+.cal-total{border:1px dashed rgba(34,211,238,.35);border-radius:10px;background:rgba(34,211,238,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px}
+.cal-total .t{font:700 8.5px var(--mono);color:var(--dim);letter-spacing:.5px}
+.cal-total .v{font:700 11.5px var(--mono);white-space:nowrap}
+.cal-total .v.up{color:var(--green2)}.cal-total .v.down{color:var(--red2)}
+.cal-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 15px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:var(--card2)}
+.cal-row b{font:700 13px var(--mono);margin-left:auto}
+.cal-row .meta{font-size:11.5px;color:var(--mut)}
 
 /* form */
 .field{margin-bottom:11px}
@@ -273,7 +255,6 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
   .dash{grid-template-columns:1fr 1fr}
   .stats{grid-template-columns:repeat(4,1fr)}
   .charts{grid-template-columns:1fr}
-  .main{grid-template-columns:1fr}
 }
 @media(max-width:620px){
   .dash{grid-template-columns:1fr}
@@ -400,19 +381,10 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
       <h3><span class="dot"></span>Daily P&L · last 14 days</h3>
       <div class="dbars" id="dailyBars"></div>
     </div>
-    <div class="card" style="grid-column:1/-1">
-      <h3><span class="dot"></span>Weekly P&L Calendar</h3>
-      <div class="weekly-cal" id="weeklyCal"></div>
-    </div>
-    <div class="card" style="grid-column:1/-1">
-      <h3><span class="dot"></span>Monthly P&L Calendar</h3>
-      <div class="monthly-cal" id="monthlyCal"></div>
-    </div>
   </div>
 
-  <!-- MAIN: FORM + TABLE -->
-  <div class="main">
-    <div class="card" id="formCard">
+  <div class="overlay" id="formOverlay">
+    <div class="modal" id="formCard">
       <h3><span class="dot"></span><span id="formTitle">Log a Trade</span></h3>
       <form id="tradeForm" autocomplete="off">
         <div class="grid2">
@@ -446,8 +418,31 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
         </div>
       </form>
     </div>
+  </div>
 
-    <div class="card">
+  <!-- CALENDAR -->
+  <div class="card" style="margin-bottom:14px">
+    <h3><span class="dot"></span>Calendar
+      <span class="view-toggle">
+        <button type="button" class="toggle-pill" data-calview="trades">Trades</button>
+        <button type="button" class="toggle-pill" data-calview="weekly">Weekly</button>
+        <button type="button" class="toggle-pill active" data-calview="calendar">Calendar</button>
+      </span>
+    </h3>
+    <div class="cal-nav">
+      <button type="button" class="cal-arrow" id="calPrev">‹</button>
+      <div class="cal-title">
+        <b id="calMonth">—</b>
+        <span id="calSummary" class="up">+$0 · 0W 0L</span>
+      </div>
+      <button type="button" class="cal-arrow" id="calNext">›</button>
+    </div>
+    <div class="cal-grid" id="calHead"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>Σ</span></div>
+    <div class="cal-grid" id="calBody"></div>
+    <div id="calAlt" style="display:none"></div>
+  </div>
+
+  <div class="card">
       <h3><span class="dot"></span>Trade Journal</h3>
       <div class="search-row">
         <input type="text" id="tradeSearch" placeholder="🔍 Filter by symbol…">
@@ -461,10 +456,9 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
           </tr></thead>
           <tbody id="tradesBody"></tbody>
         </table>
-        <div class="empty" id="tradesEmpty">No trades logged yet.<br>Your first entry powers every metric above — log one to begin. 🎯</div>
+        <div class="empty" id="tradesEmpty">No trades logged yet.<br>Connect cTrader via the 🔗 cTrader button (bridge running) — closed trades import automatically.</div>
       </div>
     </div>
-  </div>
 
   <footer>
     PropJournal · built for one-step challenges — 5% target · 3% daily DD (EOD reset) · 10% max DD · Smart Exit 1.5% · 90% profit share<br>
@@ -687,8 +681,7 @@ function render(){
 
   renderTable(m);
   renderDailyBars(m);
-  renderWeeklyCal(m);
-  renderMonthlyCal(m);
+  renderCalendar();
   renderChart(m);
 }
 
@@ -746,170 +739,92 @@ function renderDailyBars(m){
     : "<div class='empty' style='width:100%'>Daily P&L appears here once you log trades.</div>";
 }
 
-function renderWeeklyCal(m){
+let calView = "calendar", calCursor = new Date();
+function renderCalendar(){
+  const y = calCursor.getFullYear(), mm = calCursor.getMonth();
+  const mStr = String(mm+1).padStart(2,"0");
+  const monthTrades = state.trades.filter(t=> String(t.date).startsWith(y+"-"+mStr));
+  const sum = monthTrades.reduce((s,t)=> s+(num(t.pnl)||0),0);
+  const wins = monthTrades.filter(t=>(num(t.pnl)||0)>0).length;
+  const losses = monthTrades.filter(t=>(num(t.pnl)||0)<0).length;
+  $("calMonth").textContent = calCursor.toLocaleString("en-US",{month:"long",year:"numeric"});
+  const sEl = $("calSummary");
+  sEl.textContent = (sum>=0?"+":"") + usd(sum) + " · " + wins + "W " + losses + "L";
+  sEl.className = sum<0 ? "down" : "up";
   const byDay = {};
-  m.trades.forEach(t=>{
-    const d = t.date;
-    if (!byDay[d]) byDay[d] = { pnl: 0, count: 0 };
-    byDay[d].pnl += (num(t.pnl)||0);
-    byDay[d].count += 1;
-  });
-  if (!Object.keys(byDay).length){
-    $("weeklyCal").innerHTML = "<div class='empty' style='padding:24px'>Weekly calendar appears once you log trades.</div>";
-    return;
+  monthTrades.forEach(t=>{ (byDay[t.date] = byDay[t.date]||[]).push(t); });
+  const daysIn = new Date(y, mm+1, 0).getDate();
+  const offset = new Date(y, mm, 1).getDay();
+  const cells = [];
+  for(let i=0;i<offset;i++) cells.push(null);
+  for(let d=1;d<=daysIn;d++){
+    const ds = y+"-"+mStr+"-"+String(d).padStart(2,"0");
+    cells.push({ d, ds, trades: byDay[ds]||[] });
   }
-  const allDates = Object.keys(byDay).sort();
-  const first = new Date(allDates[0]);
-  const last = new Date(allDates[allDates.length-1]);
-  const startMon = new Date(first);
-  startMon.setDate(first.getDate() - ((first.getDay()+6)%7));
-  const endFri = new Date(last);
-  endFri.setDate(last.getDate() + (5 - ((last.getDay()+6)%7)));
+  const trailing = (7 - cells.length % 7) % 7;
+  for(let i=0;i<trailing;i++) cells.push(null);
 
-  const weeks = [];
-  let cur = new Date(startMon);
-  while (cur <= endFri){
-    const week = { label: "", days: [], total: 0 };
-    const mon = new Date(cur);
-    const fri = new Date(cur); fri.setDate(cur.getDate()+4);
-    week.label = mon.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + " – " + fri.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'2-digit'});
-    for (let i=0;i<5;i++){
-      const d = new Date(cur); d.setDate(cur.getDate()+i);
-      const key = d.toISOString().slice(0,10);
-      const data = byDay[key];
-      if (data){
-        week.days.push({ date: key, pnl: data.pnl, count: data.count });
-        week.total += data.pnl;
-      }else{
-        week.days.push(null);
+  if (calView === "calendar"){
+    $("calBody").style.display = "grid";
+    $("calHead").style.display = "grid";
+    $("calAlt").style.display = "none";
+    const today = todayStr();
+    const mShort = calCursor.toLocaleString("en-US",{month:"short"});
+    const dayHtml = c => {
+      if (!c) return "<div class='cal-cell off'></div>";
+      const pnl = c.trades.reduce((s,t)=> s+(num(t.pnl)||0),0);
+      const cls = c.ds===today ? "cal-cell today" : "cal-cell";
+      let inner = "<span class='d'>"+c.d+"</span>";
+      if (c.trades.length){
+        inner += "<span class='n'>"+c.trades.length+"</span><span class='v "+(pnl>=0?"up":"down")+"'>"+(pnl>=0?"+":"-")+"$"+Math.abs(Math.round(pnl))+"</span>";
       }
+      const tip = c.d+" "+mShort+" · "+(c.trades.length ? (pnl>=0?"+":"")+usd(pnl)+" · "+c.trades.length+" trade(s)" : "no trades");
+      return "<div class='"+cls+"' title='"+esc(tip)+"'>"+inner+"</div>";
+    };
+    let html = "";
+    for (let w=0; w<cells.length; w+=7){
+      const wk = cells.slice(w, w+7);
+      const total = wk.reduce((s,c)=> s + (c ? c.trades.reduce((a,t)=> a+(num(t.pnl)||0),0) : 0), 0);
+      html += wk.map(dayHtml).join("");
+      html += "<div class='cal-total' title='Week "+(w/7+1)+" total · "+(total>=0?"+":"")+usd(total)+"'>"+
+              "<span class='t'>WK "+(w/7+1)+"</span>"+
+              "<span class='v "+(total>=0?"up":"down")+"'>"+(total>=0?"+":"-")+"$"+Math.abs(Math.round(total))+"</span></div>";
     }
-    weeks.push(week);
-    cur.setDate(cur.getDate()+7);
-  }
-
-  const dayNames = ["Mon","Tue","Wed","Thu","Fri"];
-  let html = "<table class='wcal-table'><thead><tr><th class='wk-label'>Week</th>";
-  dayNames.forEach(n=> html += "<th>"+n+"</th>");
-  html += "<th>Week Total</th></tr></thead><tbody>";
-
-  weeks.forEach(w=>{
-    html += "<tr><td class='wk-label'>"+esc(w.label)+"</td>";
-    w.days.forEach(day=>{
-      if (!day){
-        html += "<td class='day empty'></td>";
-      }else{
-        const p = day.pnl;
-        const cls = p>0?"up":(p<0?"down":"zero");
-        const sign = p>0?"+":"";
-        html += "<td class='day'><div class='date'>"+day.date.slice(5)+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+day.count+" trade"+(day.count!==1?"s":"")+"</div></td>";
-      }
-    });
-    const totCls = w.total>=0?"":" neg";
-    const totSign = w.total>0?"+":"";
-    html += "<td class='week-total"+totCls+"'>"+totSign+usd(w.total)+"</td></tr>";
-  });
-  html += "</tbody></table>";
-  html += "<div class='wcal-legend'><span><i class='up'></i>Profitable day</span><span><i class='down'></i>Losing day</span><span><i class='zero'></i>No trades</span></div>";
-  $("weeklyCal").innerHTML = html;
-}
-
-function renderMonthlyCal(m){
-  const byDay = {};
-  m.trades.forEach(t=>{
-    const d = t.date;
-    if (!byDay[d]) byDay[d] = { pnl: 0, count: 0 };
-    byDay[d].pnl += (num(t.pnl)||0);
-    byDay[d].count += 1;
-  });
-  if (!Object.keys(byDay).length){
-    $("monthlyCal").innerHTML = "<div class='empty' style='padding:24px'>Monthly calendar appears once you log trades.</div>";
-    return;
-  }
-  const allDates = Object.keys(byDay).sort();
-  const first = new Date(allDates[0]);
-  const last = new Date(allDates[allDates.length-1]);
-
-  // Build ALL weeks for each month in range (including empty weeks)
-  const months = [];
-  let curMonth = new Date(first.getFullYear(), first.getMonth(), 1);
-  const endMonth = new Date(last.getFullYear(), last.getMonth(), 1);
-  while (curMonth <= endMonth){
-    const year = curMonth.getFullYear();
-    const month = curMonth.getMonth();
-    const monthKey = year + "-" + String(month+1).padStart(2,"0");
-    const monthLabel = curMonth.toLocaleDateString(undefined, {month:'short', year:'2-digit'});
-
-    // Find all Mon-Fri weeks that touch this month
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month+1, 0);
-    const startMon = new Date(firstDay);
-    startMon.setDate(firstDay.getDate() - ((firstDay.getDay()+6)%7));
-    const endFri = new Date(lastDay);
-    endFri.setDate(lastDay.getDate() + (5 - ((lastDay.getDay()+6)%7)));
-
-    const weeks = [];
-    let cur = new Date(startMon);
-    while (cur <= endFri){
-      const week = { label: "", monthKey: monthKey, days: [], total: 0, hasAnyTrade: false };
-      const mon = new Date(cur);
-      const fri = new Date(cur); fri.setDate(cur.getDate()+4);
-      week.label = mon.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + " – " + fri.toLocaleDateString(undefined,{month:'short',day:'numeric'});
-      for (let i=0;i<5;i++){
-        const d = new Date(cur); d.setDate(cur.getDate()+i);
-        const key = d.toISOString().slice(0,10);
-        const data = byDay[key];
-        if (data){
-          week.days.push({ date: key, pnl: data.pnl, count: data.count });
-          week.total += data.pnl;
-          week.hasAnyTrade = true;
-        }else{
-          week.days.push(null);
-        }
-      }
-      weeks.push(week);
-      cur.setDate(cur.getDate()+7);
+    $("calBody").innerHTML = html;
+  } else if (calView === "weekly"){
+    $("calBody").style.display = "none";
+    $("calHead").style.display = "none";
+    $("calAlt").style.display = "block";
+    const mShort = calCursor.toLocaleString("en-US",{month:"short"});
+    let rows = "";
+    for(let w=0; w<cells.length/7; w++){
+      const wk = cells.slice(w*7, w*7+7).filter(Boolean);
+      if (!wk.length) continue;
+      const pnl = wk.reduce((s,c)=> s + c.trades.reduce((a,t)=> a+(num(t.pnl)||0),0),0);
+      const cnt = wk.reduce((s,c)=> s+c.trades.length,0);
+      const w0 = wk[0], w1 = wk[wk.length-1];
+      const label = w0.d===w1.d ? mShort+" "+w0.d : mShort+" "+w0.d+" – "+mShort+" "+w1.d;
+      rows += "<div class='cal-row'><span class='meta'>"+label+"</span><span class='meta'>"+cnt+" trade(s)</span><b class='"+(pnl>=0?"pnl-up":"pnl-down")+"'>"+(pnl>=0?"+":"")+usd(pnl)+"</b></div>";
     }
-
-    const monthTotal = weeks.reduce((s,w)=> s + w.total, 0);
-    months.push({ key: monthKey, label: monthLabel, weeks, total: monthTotal });
-
-    curMonth.setMonth(curMonth.getMonth()+1);
+    $("calAlt").innerHTML = rows || "<div class='empty'>No trades this month.</div>";
+  } else {
+    $("calBody").style.display = "none";
+    $("calHead").style.display = "none";
+    $("calAlt").style.display = "block";
+    const rows = [...monthTrades].sort((a,b)=> a.date<b.date?1:-1).map(t=>{
+      const pnl = num(t.pnl)||0;
+      return "<div class='cal-row'><span class='meta'>"+esc(t.date)+" · "+esc(t.symbol)+" · "+(t.dir==="sell"?"SELL":"BUY")+"</span><b class='"+(pnl>=0?"pnl-up":"pnl-down")+"'>"+(pnl>=0?"+":"")+usd(pnl)+"</b></div>";
+    }).join("");
+    $("calAlt").innerHTML = rows || "<div class='empty'>No trades this month.</div>";
   }
-
-  const dayNames = ["Mon","Tue","Wed","Thu","Fri"];
-  let html = "<table class='mcal-table'><thead><tr><th class='mth-label'>Month / Week</th>";
-  dayNames.forEach(n=> html += "<th>"+n+"</th>");
-  html += "<th>Week Total</th></tr></thead><tbody>";
-
-  months.forEach(mth => {
-    // Month header row
-    const totCls = mth.total>=0?"":" neg";
-    const totSign = mth.total>0?"+":"";
-    html += "<tr style='background:rgba(34,211,238,.08)'><td class='mth-label' colspan='7'><b>"+esc(mth.label)+"</b></td><td class='month-total"+totCls+"'>"+totSign+usd(mth.total)+"</td></tr>";
-
-    mth.weeks.forEach(w => {
-      html += "<tr><td class='wk-label'>"+esc(w.label)+"</td>";
-      w.days.forEach(day=>{
-        if (!day){
-          html += "<td class='day empty'></td>";
-        }else{
-          const p = day.pnl;
-          const cls = p>0?"up":(p<0?"down":"zero");
-          const sign = p>0?"+":"";
-          html += "<td class='day'><div class='date'>"+day.date.slice(5)+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+day.count+"</div></td>";
-        }
-      });
-      const wtCls = w.total>=0?"":" neg";
-      const wtSign = w.total>0?"+":"";
-      html += "<td class='week-total"+wtCls+"'>"+wtSign+usd(w.total)+"</td></tr>";
-    });
-  });
-
-  html += "</tbody></table>";
-  html += "<div class='mcal-legend'><span><i class='up'></i>Profitable day</span><span><i class='down'></i>Losing day</span><span><i class='zero'></i>No trades</span></div>";
-  $("monthlyCal").innerHTML = html;
 }
+$("calPrev").onclick = ()=>{ calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth()-1, 1); renderCalendar(); };
+$("calNext").onclick = ()=>{ calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth()+1, 1); renderCalendar(); };
+document.querySelectorAll("[data-calview]").forEach(b=> b.onclick = ()=>{
+  calView = b.dataset.calview;
+  document.querySelectorAll("[data-calview]").forEach(x=> x.classList.toggle("active", x===b));
+  renderCalendar();
+});
 
 function renderChart(m){
   const canvas = $("equityChart");
@@ -1019,6 +934,7 @@ $("tradeForm").addEventListener("submit", e=>{
     else toast("Trade logged · "+(pnl>=0?"+":"")+usd(pnl), pnl>=0?"ok":"warn");
   }
   editingId = null;
+  $("formOverlay").classList.remove("show");
   save(); render(); resetForm();
 });
 
@@ -1042,10 +958,11 @@ function startEdit(id){
   $("formTitle").textContent = "Edit Trade · " + t.symbol;
   $("submitBtn").textContent = "💾 Save Changes";
   $("cancelEditBtn").style.display = "inline-flex";
-  $("formCard").scrollIntoView({behavior:"smooth", block:"start"});
+  $("formOverlay").classList.add("show");
   updatePreview();
 }
-$("cancelEditBtn").onclick = resetForm;
+$("cancelEditBtn").onclick = ()=>{ $("formOverlay").classList.remove("show"); resetForm(); };
+$("formOverlay").addEventListener("click", e=>{ if (e.target === $("formOverlay")) { $("formOverlay").classList.remove("show"); resetForm(); } });
 $("tradeSearch").addEventListener("input", ()=> render(compute()));
 $("floatingInput").addEventListener("input", e=>{
   state.floating = num(e.target.value) || 0; save(); render();
