@@ -6,14 +6,43 @@
   "devCommand": "node ctrader_bridge.js",
   "installCommand": "",
   "outputDirectory": ".",
-  "functions": {},
-  "routes": [
+  "functions": {
+    "api/*.js": {
+      "runtime": "edge"
+    }
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/api/trades",
+      "destination": "/api/trades"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
@@ -34,33 +63,6 @@
           "value": "strict-origin-when-cross-origin"
         }
       ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/trades",
-      "destination": "/api/trades"
-    },
-    {
-      "source": "/api/health",
-      "destination": "/api/health"
     }
   ],
   "crons": [],
