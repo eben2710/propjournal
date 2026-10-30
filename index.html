@@ -830,88 +830,80 @@ function renderMonthlyCal(m){
   const first = new Date(allDates[0]);
   const last = new Date(allDates[allDates.length-1]);
 
-  // Group by month
+  // Build ALL weeks for each month in range (including empty weeks)
   const months = [];
-  let cur = new Date(first.getFullYear(), first.getMonth(), 1);
+  let curMonth = new Date(first.getFullYear(), first.getMonth(), 1);
   const endMonth = new Date(last.getFullYear(), last.getMonth(), 1);
-  while (cur <= endMonth){
-    const monthKey = cur.getFullYear() + "-" + String(cur.getMonth()+1).padStart(2,"0");
-    const monthLabel = cur.toLocaleDateString(undefined, {month:'short', year:'2-digit'});
-    months.push({ key: monthKey, label: monthLabel, days: {}, total: 0 });
-    cur.setMonth(cur.getMonth()+1);
+  while (curMonth <= endMonth){
+    const year = curMonth.getFullYear();
+    const month = curMonth.getMonth();
+    const monthKey = year + "-" + String(month+1).padStart(2,"0");
+    const monthLabel = curMonth.toLocaleDateString(undefined, {month:'short', year:'2-digit'});
+
+    // Find all Mon-Fri weeks that touch this month
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month+1, 0);
+    const startMon = new Date(firstDay);
+    startMon.setDate(firstDay.getDate() - ((firstDay.getDay()+6)%7));
+    const endFri = new Date(lastDay);
+    endFri.setDate(lastDay.getDate() + (5 - ((lastDay.getDay()+6)%7)));
+
+    const weeks = [];
+    let cur = new Date(startMon);
+    while (cur <= endFri){
+      const week = { label: "", monthKey: monthKey, days: [], total: 0, hasAnyTrade: false };
+      const mon = new Date(cur);
+      const fri = new Date(cur); fri.setDate(cur.getDate()+4);
+      week.label = mon.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + " – " + fri.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      for (let i=0;i<5;i++){
+        const d = new Date(cur); d.setDate(cur.getDate()+i);
+        const key = d.toISOString().slice(0,10);
+        const data = byDay[key];
+        if (data){
+          week.days.push({ date: key, pnl: data.pnl, count: data.count });
+          week.total += data.pnl;
+          week.hasAnyTrade = true;
+        }else{
+          week.days.push(null);
+        }
+      }
+      weeks.push(week);
+      cur.setDate(cur.getDate()+7);
+    }
+
+    const monthTotal = weeks.reduce((s,w)=> s + w.total, 0);
+    months.push({ key: monthKey, label: monthLabel, weeks, total: monthTotal });
+
+    curMonth.setMonth(curMonth.getMonth()+1);
   }
 
-  // Assign trades to months
-  Object.entries(byDay).forEach(([date, data])=>{
-    const monthKey = date.slice(0,7);
-    const month = months.find(m=> m.key === monthKey);
-    if (month){
-      month.days[date] = data;
-      month.total += data.pnl;
-    }
-  });
-
-  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  let html = "<table class='mcal-table'><thead><tr><th class='mth-label'>Month</th>";
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri"];
+  let html = "<table class='mcal-table'><thead><tr><th class='mth-label'>Month / Week</th>";
   dayNames.forEach(n=> html += "<th>"+n+"</th>");
-  html += "<th>Month Total</th></tr></thead><tbody>";
+  html += "<th>Week Total</th></tr></thead><tbody>";
 
-  months.forEach(mth=>{
-    // Build calendar grid for this month
-    const year = parseInt(mth.key.split("-")[0]);
-    const month = parseInt(mth.key.split("-")[1]);
-    const firstDay = new Date(year, month-1, 1);
-    const lastDay = new Date(year, month, 0);
-    const startOffset = (firstDay.getDay() + 6) % 7; // Monday = 0
-    const daysInMonth = lastDay.getDate();
-
-    html += "<tr><td class='mth-label'>"+esc(mth.label)+"</td>";
-
-    let day = 1 - startOffset;
-    let weekCells = [];
-    while (day <= daysInMonth){
-      for (let dow=0; dow<7; dow++){
-        if (day >= 1 && day <= daysInMonth){
-          const key = year + "-" + String(month).padStart(2,"0") + "-" + String(day).padStart(2,"0");
-          const data = mth.days[key];
-          if (data){
-            const p = data.pnl;
-            const cls = p>0?"up":(p<0?"down":"zero");
-            const sign = p>0?"+":"";
-            weekCells.push("<td class='day'><div class='date'>"+day+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+data.count+"</div></td>");
-          }else{
-            weekCells.push("<td class='day empty'><div class='date'>"+day+"</div></td>");
-          }
-        }else{
-          weekCells.push("<td class='day empty'></td>");
-        }
-        day++;
-      }
-      // If we still have days left, close row and start new one (but for monthly we show all weeks in one row)
-      if (day <= daysInMonth){
-        // This month spans multiple weeks - we'll show as one long row
-        // Actually, let's just show all days in one row for monthly view
-      }
-    }
-    // For monthly, we show all days in a single row (wrap visually via horizontal scroll)
-    // Rebuild: just iterate all days of month
-    html = html.slice(0, -5); // remove </tr> we'll rebuild
-    html += "<td class='mth-label'>"+esc(mth.label)+"</td>";
-    for (let d=1; d<=daysInMonth; d++){
-      const key = year + "-" + String(month).padStart(2,"0") + "-" + String(d).padStart(2,"0");
-      const data = mth.days[key];
-      if (data){
-        const p = data.pnl;
-        const cls = p>0?"up":(p<0?"down":"zero");
-        const sign = p>0?"+":"";
-        html += "<td class='day'><div class='date'>"+d+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+data.count+"</div></td>";
-      }else{
-        html += "<td class='day empty'><div class='date'>"+d+"</div></td>";
-      }
-    }
+  months.forEach(mth => {
+    // Month header row
     const totCls = mth.total>=0?"":" neg";
     const totSign = mth.total>0?"+":"";
-    html += "<td class='month-total"+totCls+"'>"+totSign+usd(mth.total)+"</td></tr>";
+    html += "<tr style='background:rgba(34,211,238,.08)'><td class='mth-label' colspan='7'><b>"+esc(mth.label)+"</b></td><td class='month-total"+totCls+"'>"+totSign+usd(mth.total)+"</td></tr>";
+
+    mth.weeks.forEach(w => {
+      html += "<tr><td class='wk-label'>"+esc(w.label)+"</td>";
+      w.days.forEach(day=>{
+        if (!day){
+          html += "<td class='day empty'></td>";
+        }else{
+          const p = day.pnl;
+          const cls = p>0?"up":(p<0?"down":"zero");
+          const sign = p>0?"+":"";
+          html += "<td class='day'><div class='date'>"+day.date.slice(5)+"</div><div class='pnl "+cls+"'>"+sign+usd(p)+"</div><div class='trades'>"+day.count+"</div></td>";
+        }
+      });
+      const wtCls = w.total>=0?"":" neg";
+      const wtSign = w.total>0?"+":"";
+      html += "<td class='week-total"+wtCls+"'>"+wtSign+usd(w.total)+"</td></tr>";
+    });
   });
 
   html += "</tbody></table>";
