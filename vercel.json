@@ -1,11 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "name": "prop-firm-risk-ledger",
-  "framework": null,
-  "buildCommand": "",
-  "devCommand": "node ctrader_bridge.js",
-  "installCommand": "",
-  "outputDirectory": ".",
   "functions": {
     "api/health.js": { "runtime": "edge" },
     "api/trades.js": { "runtime": "edge" }
