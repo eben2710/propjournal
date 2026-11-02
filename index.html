@@ -239,6 +239,22 @@ td.notes-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;font-family
 .modal-foot{display:flex;gap:9px;margin-top:18px;flex-wrap:wrap}
 
 /* toast */
+.auth-area{display:flex;align-items:center;gap:8px}
+.user-chip{font-size:12px;color:var(--mut);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.auth-switch{font-size:12px;color:var(--mut);margin-top:12px;text-align:center}
+.auth-switch a{color:var(--cyan2)}
+.auth-error{color:var(--red2);font-size:12.5px;min-height:18px;margin-top:8px;text-align:center}
+.ctr-card{border:1px solid var(--line2);border-radius:14px;padding:16px;margin-bottom:16px;background:rgba(34,211,238,.04)}
+.ctr-card h3{margin-bottom:8px}
+.ctr-steps{margin:0 0 12px 18px;color:var(--mut);font-size:12px;line-height:1.7}
+.ctr-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.ctr-acc{border:1px solid var(--line);border-radius:11px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:rgba(8,14,28,.4)}
+.ctr-meta{font-size:11px;color:var(--dim)}
+.ctr-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ctr-empty{color:var(--dim);font-size:12.5px;padding:8px 2px}
+.ctr-error{color:var(--red2);font-size:12.5px;min-height:16px;margin:6px 0}
+.ctr-progress{display:flex;align-items:center;gap:10px;margin:8px 0}
+.ctr-progress .bar{flex:1}
 .toasts{position:fixed;right:20px;bottom:20px;z-index:80;display:flex;flex-direction:column;gap:9px}
 .toast{
   background:linear-gradient(160deg,#15223f,#0e1930);border:1px solid var(--line2);color:var(--txt);
@@ -277,7 +293,8 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
     </div>
     <div class="head-right">
       <span class="phase-badge" id="phaseBadge">Challenge Phase</span>
-      <button class="btn" id="syncCtraderBtn" title="Import closed trades from the cTrader bridge">🔗 cTrader</button>
+      <span class="auth-area" id="authArea"></span>
+      <button class="btn" id="syncCtraderBtn" title="Import closed trades from the local cTrader bridge">🔗 Bridge sync</button>
       <button class="btn" id="openSettings">⚙️ Settings</button>
     </div>
   </header>
@@ -467,11 +484,40 @@ footer{text-align:center;color:var(--dim);font-size:11.5px;margin-top:34px;line-
   </footer>
 </div>
 
+<!-- AUTH MODAL -->
+<div class="overlay" id="authOverlay">
+  <div class="modal" style="max-width:420px">
+    <h2 id="authTitle">Sign in</h2>
+    <p class="sub">Your journal syncs securely across devices — each account's cTrader connection and trades are private.</p>
+    <div class="field"><label>Email</label><input type="email" id="a_email" autocomplete="email" placeholder="you@example.com"></div>
+    <div class="field"><label>Password</label><input type="password" id="a_password" autocomplete="current-password" placeholder="••••••••"></div>
+    <div class="form-actions"><button class="btn primary" id="authSubmit" style="flex:1;justify-content:center">Sign in</button></div>
+    <div class="auth-switch" id="authSwitch">New here? <a href="#" id="authModeToggle">Create an account</a></div>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
     <h2>⚙️ Journal Settings</h2>
     <p class="sub">Account parameters & instrument values</p>
+    <div class="ctr-card">
+      <h3>🔗 Connect cTrader (official Open API)</h3>
+      <ol class="ctr-steps">
+        <li>Click <b>Connect cTrader</b> — you'll approve <b>view-only</b> access on cTrader's own site. Your cTrader password is never seen or stored by us.</li>
+        <li>Pick the account, then press <b>Import</b> — closed trades are pulled in with live progress.</li>
+        <li><b>Refresh</b> anytime. <b>Disconnect</b> deletes stored credentials; you can also revoke access at id.ctrader.com.</li>
+      </ol>
+      <div id="ctrAuthGate" style="display:none;color:var(--mut);font-size:12.5px;padding:4px 0">Sign in to link a cTrader account — every user's connection and data stay isolated to their own journal.</div>
+      <div id="ctrList" class="ctr-list"></div>
+      <div class="ctr-progress" id="ctrProgress" style="display:none"><div class="bar"><i id="ctrBar" style="width:0%"></i></div><span class="mono" id="ctrProgText" style="font-size:11px;color:var(--mut);min-width:170px"></span></div>
+      <div class="ctr-error" id="ctrError"></div>
+      <div class="modal-foot" style="margin-top:6px">
+        <button class="btn primary" id="ctrConnectBtn">🔗 Connect cTrader</button>
+        <button class="btn" id="ctrRefreshBtn" style="display:none">↻ Refresh all</button>
+      </div>
+    </div>
     <div class="grid2">
       <div class="field"><label>Initial balance $</label><input type="number" step="0.01" id="s_initial"></div>
       <div class="field"><label>Phase</label>
@@ -557,7 +603,7 @@ function toast(msg, type){
 /* ================= core math ================= */
 function compute(){
   const B = state.initialBalance;
-  const trades = [...state.trades].sort((a,b)=> a.date===b.date ? a.id-b.id : (a.date<b.date?-1:1));
+  const trades = [...state.trades].sort((a,b)=> a.date===b.date ? String(a.id).localeCompare(String(b.id)) : (a.date<b.date?-1:1));
   const balance = B + trades.reduce((s,t)=> s + (num(t.pnl)||0), 0);
   const floating = num(state.floating)||0;
   const equity = balance + floating;
@@ -718,9 +764,14 @@ function renderTable(m){
   }).join("");
 
   document.querySelectorAll("[data-edit]").forEach(b=> b.onclick = ()=> startEdit(b.dataset.edit));
-  document.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=> {
+  document.querySelectorAll("[data-del]").forEach(b=> b.onclick = async ()=> {
     const t = state.trades.find(x=> String(x.id)===b.dataset.del);
     if (t && confirm("Delete "+t.symbol+" trade ("+usd(num(t.pnl)||0)+")?")){
+      try {
+        if (authUser && String(t.id).includes("-")){
+          await apiFetch("/api/journal/"+t.id, { method: "DELETE" });
+        }
+      } catch(err){ toast("Delete failed: "+(err.message||err),"err"); return; }
       state.trades = state.trades.filter(x=> String(x.id)!==b.dataset.del);
       save(); render(); toast("Trade deleted","warn");
     }
@@ -901,7 +952,7 @@ function updatePreview(){
   $(id).addEventListener("change", updatePreview);
 });
 
-$("tradeForm").addEventListener("submit", e=>{
+$("tradeForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const date = $("f_date").value, symbol = $("f_symbol").value.trim().toUpperCase();
   if (!date || !symbol){ toast("Date and symbol are required","err"); return; }
@@ -921,18 +972,36 @@ $("tradeForm").addEventListener("submit", e=>{
     smartExit: $("f_smartexit").checked,
     notes: $("f_notes").value.trim()
   };
-  if (editingId){
-    const i = state.trades.findIndex(t=> String(t.id)===String(editingId));
-    if (i>-1) state.trades[i] = Object.assign({}, state.trades[i], data);
-    toast("Trade updated","ok");
-  } else {
-    state.trades.push(Object.assign({ id: Date.now() + Math.floor(Math.random()*999) }, data));
-    // live-rule feedback
-    const after = compute();
-    if (after.status==="maxdd") toast("⚠️ That trade breached Max DD (10%)","err");
-    else if (after.status==="daily") toast("⚠️ Daily DD limit breached (3%) — stop for today","err");
-    else if (after.status==="passed") toast("🏆 Target hit — challenge passed!","gold");
-    else toast("Trade logged · "+(pnl>=0?"+":"")+usd(pnl), pnl>=0?"ok":"warn");
+  try {
+    if (editingId){
+      const i = state.trades.findIndex(t=> String(t.id)===String(editingId));
+      if (i>-1){
+        const merged = Object.assign({}, state.trades[i], data);
+        if (authUser && String(state.trades[i].id).includes("-")){
+          await apiFetch("/api/journal/"+state.trades[i].id, { method: "PUT", body: JSON.stringify(tradeToServer(merged)) });
+        }
+        state.trades[i] = merged;
+      }
+      toast("Trade updated","ok");
+    } else if (authUser){
+      const saved = await serverAddTrade(data);
+      state.trades.push(saved);
+      const after = compute();
+      if (after.status==="maxdd") toast("⚠️ That trade breached Max DD (10%)","err");
+      else if (after.status==="daily") toast("⚠️ Daily DD limit breached (3%) — stop for today","err");
+      else if (after.status==="passed") toast("🏆 Target hit — challenge passed!","gold");
+      else toast("Trade logged · "+(pnl>=0?"+":"")+usd(pnl), pnl>=0?"ok":"warn");
+    } else {
+      state.trades.push(Object.assign({ id: Date.now() + Math.floor(Math.random()*999) }, data));
+      const after = compute();
+      if (after.status==="maxdd") toast("⚠️ That trade breached Max DD (10%)","err");
+      else if (after.status==="daily") toast("⚠️ Daily DD limit breached (3%) — stop for today","err");
+      else if (after.status==="passed") toast("🏆 Target hit — challenge passed!","gold");
+      else toast("Trade logged · "+(pnl>=0?"+":"")+usd(pnl), pnl>=0?"ok":"warn");
+    }
+  } catch(err){
+    toast("Save failed: "+(err.message||err),"err");
+    return;
   }
   editingId = null;
   $("formOverlay").classList.remove("show");
@@ -1079,13 +1148,287 @@ async function syncCtrader(verbose){
   }
 }
 $("syncCtraderBtn").onclick = ()=> syncCtrader(true);
-(function init(){
+
+/* ================= auth & server sync ================= */
+let authUser = null;
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(path, Object.assign({
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin"
+  }, opts));
+  let body = null;
+  try { body = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const err = new Error((body && body.message) || ("HTTP " + res.status));
+    err.code = body && body.error;
+    err.status = res.status;
+    err.body = body;
+    throw err;
+  }
+  return body;
+}
+
+function tradeToServer(t) {
+  return {
+    date: t.date,
+    symbol: t.symbol,
+    dir: t.dir,
+    lots: t.lots === "" || t.lots == null ? null : num(t.lots),
+    entry: t.entry === "" || t.entry == null ? null : num(t.entry),
+    exit: t.exit === "" || t.exit == null ? null : num(t.exit),
+    pnl: t.pnl == null ? null : num(t.pnl),
+    smartExit: !!t.smartExit,
+    notes: t.notes || "",
+    ext: t.ext ?? (String(t.id).includes("-") ? null : String(t.id))
+  };
+}
+
+function serverToTrade(r) {
+  return {
+    id: r.id,
+    ext: r.ext ?? null,
+    source: r.source || "local",
+    date: r.date,
+    symbol: r.symbol,
+    dir: r.dir,
+    lots: r.lots == null ? "" : String(r.lots),
+    entry: r.entry == null ? "" : String(r.entry),
+    sl: "", tp: "",
+    exit: r.exit == null ? "" : String(r.exit),
+    pnl: r.pnl == null ? 0 : Number(r.pnl),
+    smartExit: !!r.smartExit,
+    notes: r.notes || ""
+  };
+}
+
+function renderAuthArea() {
+  const el = $("authArea");
+  if (authUser) {
+    el.innerHTML = "<span class='user-chip' title='" + esc(authUser.email) + "'>👤 " + esc(authUser.email) + "</span>" +
+      "<button class='btn' id='signOutBtn'>Sign out</button>";
+    $("signOutBtn").onclick = signOut;
+  } else {
+    el.innerHTML = "<button class='btn primary' id='signInBtn'>Sign in</button>";
+    $("signInBtn").onclick = () => openAuth("signin");
+  }
+}
+
+let authMode = "signin";
+function openAuth(mode) {
+  authMode = mode;
+  $("authTitle").textContent = mode === "signin" ? "Sign in" : "Create account";
+  $("authSubmit").textContent = mode === "signin" ? "Sign in" : "Create account";
+  $("authSwitch").innerHTML = mode === "signin"
+    ? "New here? <a href='#' id='authModeToggle'>Create an account</a>"
+    : "Already have an account? <a href='#' id='authModeToggle'>Sign in</a>";
+  $("authModeToggle").onclick = (e) => { e.preventDefault(); openAuth(mode === "signin" ? "register" : "signin"); };
+  $("authError").textContent = "";
+  $("authOverlay").classList.add("show");
+  setTimeout(() => $("a_email").focus(), 50);
+}
+$("authSubmit").onclick = async () => {
+  $("authError").textContent = "";
+  const email = $("a_email").value.trim(), password = $("a_password").value;
+  if (!email || !password) { $("authError").textContent = "Email and password are required."; return; }
+  $("authSubmit").disabled = true;
+  try {
+    await apiFetch("/api/auth/" + (authMode === "signin" ? "login" : "register"), {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+    location.reload();
+  } catch (err) {
+    $("authError").textContent = err.message || "Authentication failed.";
+    $("authSubmit").disabled = false;
+  }
+};
+$("authOverlay").addEventListener("click", (e) => {
+  if (e.target === $("authOverlay")) $("authOverlay").classList.remove("show");
+});
+$("a_password").addEventListener("keydown", (e) => { if (e.key === "Enter") $("authSubmit").click(); });
+
+async function signOut() {
+  try { await apiFetch("/api/auth/logout", { method: "POST" }); } catch (e) {}
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || "{}");
+    s.trades = [];
+    localStorage.setItem(KEY, JSON.stringify(s));
+  } catch (e) {}
+  location.reload();
+}
+
+async function loadServerTrades() {
+  const data = await apiFetch("/api/journal");
+  state.trades = (data.trades || []).map(serverToTrade);
+  save();
+  refreshSymList();
+}
+
+async function migrateLocalToServer() {
+  const pending = state.trades.filter((t) => !String(t.id).includes("-"));
+  if (!pending.length) return;
+  const res = await apiFetch("/api/journal", {
+    method: "POST",
+    body: JSON.stringify({ trades: pending.map(tradeToServer) })
+  });
+  await loadServerTrades();
+  if (res.imported) toast("Migrated " + res.imported + " local trade(s) to your account", "ok");
+}
+
+async function serverAddTrade(data) {
+  const res = await apiFetch("/api/journal", {
+    method: "POST",
+    body: JSON.stringify({ trade: tradeToServer(data) })
+  });
+  return serverToTrade(res.trade);
+}
+
+/* ================= cTrader connection UI ================= */
+let ctrAccounts = [];
+
+function ctrProgress(show, text, pct) {
+  $("ctrProgress").style.display = show ? "flex" : "none";
+  if (text != null) $("ctrProgText").textContent = text;
+  if (pct != null) $("ctrBar").style.width = pct + "%";
+}
+
+function renderCtrader() {
+  const gate = $("ctrAuthGate"), list = $("ctrList");
+  if (!authUser) {
+    gate.style.display = "block";
+    list.innerHTML = "";
+    $("ctrConnectBtn").style.display = "none";
+    $("ctrRefreshBtn").style.display = "none";
+    return;
+  }
+  gate.style.display = "none";
+  $("ctrConnectBtn").style.display = "inline-flex";
+  $("ctrRefreshBtn").style.display = ctrAccounts.length ? "inline-flex" : "none";
+  list.innerHTML = ctrAccounts.length ? ctrAccounts.map((a) => {
+    const st = a.status === "active"
+      ? "<span class='pill g'>Active</span>"
+      : "<span class='pill r'>Reauthorize required</span>";
+    const env = a.isLive ? "<span class='pill a'>LIVE</span>" : "<span class='pill c'>DEMO</span>";
+    const last = a.lastSyncAt ? new Date(a.lastSyncAt).toLocaleString() : "never";
+    return "<div class='ctr-acc'>" +
+      "<div><b>" + esc(a.brokerTitle) + "</b> <span class='mono' style='font-size:11.5px'>login " + esc(a.loginMasked) + "</span> " + env + " " + st + "</div>" +
+      "<div class='ctr-meta'>Account " + esc(String(a.ctidTraderAccountId).slice(0, 4)) + "••• · last import: " + esc(last) + "</div>" +
+      "<div class='ctr-actions'>" +
+        "<button class='btn' data-ctr-import='" + a.ctidTraderAccountId + "'>⬇ " + (a.lastSyncAt ? "Refresh" : "Import history") + "</button>" +
+        (a.status === "reauth_required" ? "<button class='btn gold' data-ctr-reconnect='" + a.ctidTraderAccountId + "'>Reconnect</button>" : "") +
+        "<button class='btn danger' data-ctr-disc='" + a.ctidTraderAccountId + "'>Disconnect</button>" +
+      "</div></div>";
+  }).join("") : "<div class='ctr-empty'>No cTrader account linked yet — click Connect cTrader above.</div>";
+  list.querySelectorAll("[data-ctr-import]").forEach((b) => (b.onclick = () => importCtrader(b.dataset.ctrImport)));
+  list.querySelectorAll("[data-ctr-disc]").forEach((b) => (b.onclick = () => disconnectCtrader(b.dataset.ctrDisc)));
+  list.querySelectorAll("[data-ctr-reconnect]").forEach((b) => (b.onclick = () => { window.location.href = "/api/ctrader/start"; }));
+}
+
+async function refreshCtraderAccounts() {
+  if (!authUser) { renderCtrader(); return; }
+  try {
+    const d = await apiFetch("/api/ctrader/accounts");
+    ctrAccounts = d.accounts || [];
+    $("ctrError").textContent = "";
+  } catch (err) {
+    ctrAccounts = [];
+    $("ctrError").textContent = err.message || "Could not load connected accounts.";
+  }
+  renderCtrader();
+}
+
+async function importCtrader(ctid) {
+  if (!authUser) return;
+  $("ctrError").textContent = "";
+  ctrProgress(true, "Connecting to cTrader…", 8);
+  const acc = ctrAccounts.find((a) => String(a.ctidTraderAccountId) === String(ctid));
+  let fromMs = 0;
+  if (acc && acc.lastSyncAt) fromMs = Math.max(0, new Date(acc.lastSyncAt).getTime() - 86400000);
+  let imported = 0, page = 0;
+  try {
+    while (page++ < 300) {
+      const res = await apiFetch("/api/ctrader/import", {
+        method: "POST",
+        body: JSON.stringify({ ctidTraderAccountId: ctid, fromMs })
+      });
+      imported += res.imported || 0;
+      ctrProgress(true, "Imported " + imported + " new trade(s) · page " + page, Math.min(95, page * 8));
+      if (!res.hasMore) break;
+      fromMs = res.lastTimestampMs;
+    }
+    ctrProgress(true, "Done — " + imported + " new trade(s) imported.", 100);
+    toast("cTrader import complete · " + imported + " new trade(s)", "ok");
+  } catch (err) {
+    $("ctrError").textContent = err.message || "Import failed — try again.";
+    toast("Import error", "err");
+  }
+  await refreshCtraderAccounts();
+  try { await loadServerTrades(); } catch (e) {}
+  render();
+  setTimeout(() => ctrProgress(false), 2500);
+}
+
+async function disconnectCtrader(ctid) {
+  if (!confirm("Disconnect this cTrader account?\n\nStored access credentials are deleted from our server. Your journal keeps already-imported trades. To revoke access inside cTrader itself, visit id.ctrader.com → Open API → Granting access.")) return;
+  try {
+    const res = await apiFetch("/api/ctrader/disconnect", {
+      method: "POST",
+      body: JSON.stringify({ ctidTraderAccountId: ctid })
+    });
+    toast("Disconnected (" + res.disconnected + ") — stored credentials removed", "warn");
+  } catch (err) {
+    toast("Disconnect failed: " + (err.message || err), "err");
+  }
+  await refreshCtraderAccounts();
+}
+
+$("ctrConnectBtn").onclick = () => {
+  if (authUser) window.location.href = "/api/ctrader/start";
+};
+$("ctrRefreshBtn").onclick = async () => {
+  for (const a of ctrAccounts.filter((x) => x.status === "active")) {
+    await importCtrader(a.ctidTraderAccountId);
+  }
+};
+
+/* ================= boot ================= */
+async function boot() {
+  try {
+    const me = await apiFetch("/api/auth/me");
+    authUser = me.user;
+  } catch (e) {
+    authUser = null;
+  }
+  renderAuthArea();
+  if (authUser) {
+    try {
+      await loadServerTrades();
+      await migrateLocalToServer();
+    } catch (err) {
+      toast("Server sync failed: " + (err.message || err), "err");
+    }
+  }
+  await refreshCtraderAccounts();
+  const qp = new URLSearchParams(location.search);
+  if (qp.get("ctrader") === "connected") {
+    toast("cTrader connected (" + (qp.get("accounts") || "?") + " account(s)) — press Import below", "gold");
+  }
+  if (qp.get("ctrader") === "error") {
+    toast("cTrader: " + (qp.get("reason") || "connection failed"), "err");
+  }
+  if (qp.get("ctrader")) history.replaceState({}, "", location.pathname);
+  render();
+  syncCtrader(false);
+  setInterval(() => { if ($("f_date").value !== "") render(); }, 60000);
+}
+
+(function init() {
   refreshSymList();
   $("f_date").value = todayStr();
   resetForm();
   render();
-  syncCtrader(false);
-  setInterval(()=>{ if ($("f_date").value !== "" ) render(); }, 60000);
+  boot();
 })();
 </script>
 </body>

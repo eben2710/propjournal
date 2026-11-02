@@ -31,7 +31,7 @@ export default async function handler(
       clearTimeout(timeoutId);
 
       if (res.ok) {
-        const data = await res.json();
+        const data: any = await res.json();
         bridgeStatus = 'connected';
         bridgeTrades = data.trades || 0;
       } else {

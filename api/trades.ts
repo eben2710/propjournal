@@ -54,7 +54,7 @@ export default async function handler(
       });
     }
 
-    const trades = await res.json();
+    const trades: any = await res.json();
 
     if (!Array.isArray(trades)) {
       console.error('Bridge returned non-array response');
@@ -76,7 +76,7 @@ export default async function handler(
 
     return response.status(200).json(responseData);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching trades:', error);
 
     if (error.name === 'AbortError') {
