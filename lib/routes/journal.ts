@@ -1,9 +1,9 @@
-import crypto from "node:crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb, type Row } from "../../lib/db";
-import { requireUser } from "../../lib/auth";
-import { tradeSchema, tradeBatchSchema } from "../../lib/validate";
-import { errorResponse, json, readJson, originAllowed, HttpError } from "../../lib/http";
+import crypto from "node:crypto";
+import { getDb, type Row } from "../db";
+import { requireUser } from "../auth";
+import { tradeSchema, tradeBatchSchema, tradeUpdateSchema } from "../validate";
+import { errorResponse, json, readJson, originAllowed, HttpError } from "../http";
 
 function mapRow(r: Row) {
   const date =
@@ -26,11 +26,15 @@ function mapRow(r: Row) {
   };
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export async function handleJournal(
+  req: VercelRequest,
+  res: VercelResponse,
+  args: string[]
+): Promise<void> {
   try {
     if (req.method === "OPTIONS") {
-      res.setHeader("Allow", "GET, POST, OPTIONS");
-      return res.status(204).end();
+      res.setHeader("Allow", "GET, POST, PUT, DELETE, OPTIONS");
+      res.status(204).end(); return;
     }
     if (!originAllowed(req)) {
       throw new HttpError(403, "bad_origin", "Cross-origin request rejected");
@@ -38,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const q = getDb();
     const user = await requireUser(q, req);
 
-    if (req.method === "GET") {
+    if (!args.length && req.method === "GET") {
       const rows = await q(
         `SELECT id, source, external_ref, trade_date, symbol, dir, lots, entry_price, exit_price, pnl, smart_exit, notes, created_at
            FROM trades WHERE user_id = $1
@@ -48,7 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return json(res, 200, { trades: rows.map(mapRow) });
     }
 
-    if (req.method === "POST") {
+    if (!args.length && req.method === "POST") {
       const body = await readJson(req);
       if (body.trades) {
         const parsed = tradeBatchSchema.parse(body);
@@ -77,10 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           );
           if (rows.length) imported += 1;
         }
-        return json(res, 200, {
-          imported,
-          skipped: parsed.trades.length - imported
-        });
+        return json(res, 200, { imported, skipped: parsed.trades.length - imported });
       }
 
       const t = tradeSchema.parse(body.trade ?? body);
@@ -111,7 +112,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return json(res, 201, { trade: mapRow(rows[0]) });
     }
 
-    throw new HttpError(405, "method_not_allowed", "Use GET or POST");
+    const id = String(args[0] ?? "");
+    if (!/^[0-9a-f-]{36}$/i.test(id)) {
+      throw new HttpError(404, "not_found", "Trade not found");
+    }
+
+    if (req.method === "PUT") {
+      const t = tradeUpdateSchema.parse(await readJson(req));
+      const sets: string[] = [];
+      const params: any[] = [id, user.id];
+      const add = (col: string, value: unknown) => {
+        params.push(value);
+        sets.push(`${col} = $${params.length}`);
+      };
+      if (t.date !== undefined) add("trade_date", t.date);
+      if (t.symbol !== undefined) add("symbol", t.symbol.toUpperCase());
+      if (t.dir !== undefined) add("dir", t.dir);
+      if (t.lots !== undefined) add("lots", t.lots);
+      if (t.entry !== undefined) add("entry_price", t.entry);
+      if (t.exit !== undefined) add("exit_price", t.exit);
+      if (t.pnl !== undefined) add("pnl", t.pnl);
+      if (t.smartExit !== undefined) add("smart_exit", t.smartExit);
+      if (t.notes !== undefined) add("notes", t.notes);
+      sets.push("updated_at = now()");
+      if (sets.length === 1) {
+        return json(res, 200, { ok: true });
+      }
+      const rows = await q(
+        `UPDATE trades SET ${sets.join(", ")} WHERE id = $1 AND user_id = $2 RETURNING id`,
+        params
+      );
+      if (!rows.length) {
+        throw new HttpError(404, "not_found", "Trade not found");
+      }
+      return json(res, 200, { ok: true });
+    }
+
+    if (req.method === "DELETE") {
+      const rows = await q(
+        `DELETE FROM trades WHERE id = $1 AND user_id = $2 RETURNING id`,
+        [id, user.id]
+      );
+      if (!rows.length) {
+        throw new HttpError(404, "not_found", "Trade not found");
+      }
+      return json(res, 200, { ok: true });
+    }
+
+    throw new HttpError(405, "method_not_allowed", "Unsupported method for this route");
   } catch (err) {
     errorResponse(res, err);
   }
